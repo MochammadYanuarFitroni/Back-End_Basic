@@ -1,12 +1,6 @@
 const books = require('./bookshelf');
 const { nanoid } = require('nanoid');
 
-const isreading = (pageCount, readPage) => {
-    if (pageCount > readPage) {
-        return true;
-    }
-    return false;
-}
 
 // add/save book (POST)
 const addBookHandler = (request, h) => {
@@ -23,7 +17,7 @@ const addBookHandler = (request, h) => {
     const id = nanoid(16);
     const insertedAt = new Date().toISOString();
     const updatedAt = insertedAt;
-
+    
     const isfinished = (pageCount, readPage) => {
         if (pageCount === readPage) {
             return true;
@@ -31,8 +25,15 @@ const addBookHandler = (request, h) => {
         return false;
     }
     const finished = isfinished(pageCount, readPage);
-    const reading = isreading(pageCount, readPage);
 
+    const isreading = (pageCount, readPage) => {
+        if (pageCount > readPage) {
+            return true;
+        }
+        return false;
+    }
+    const reading = isreading(pageCount, readPage);
+    
     const newBook = {
         id, 
         name, 
@@ -75,7 +76,7 @@ const addBookHandler = (request, h) => {
             status: 'success',
             message: 'Buku berhasil ditambahkan',
             data: {
-                noteId: id,
+                bookId: id,
             },
         });
         response.code(201);
@@ -91,11 +92,71 @@ const addBookHandler = (request, h) => {
 };
 
 // view all books (GET)
-const getAllBooksHandler = () => ({
-    status: 'success',
-    data: {
-        books,
-    },
-});
+const getAllBooksHandler = (request, h) => {
+    const { name, reading, finished} = request.query;
+    
+    if(name){
+        const response = h.response({
+            status: 'success',
+            data: {
+                books: books
+                .filter((book) => book.name.toLowerCase().includes(name.toLowerCase()))
+                .map((newbook) => ({
+                    id: newbook.id,
+                    name: newbook.name,
+                    publisher: newbook.publisher
+                }))
+            },
+        });
+        response.code(200)
+        return response
+    }
+    else if(reading === "1" && finished === "0"){
+        const response = h.response({
+            status: 'success',
+            data: {
+                books: books
+                .filter((book) => book.reading === true && book.finished === false)
+                .map((newbook) => ({
+                    id: newbook.id,
+                    name: newbook.name,
+                    publisher: newbook.publisher
+                }))
+            },
+        });
+        response.code(200)
+        return response
+    }
+    else if(reading === "0" && finished === "1"){
+        const response = h.response({
+            status: 'success',
+            data: {
+                books: books
+                .filter((book) => book.reading === false && book.finished === true)
+                .map((newbook) => ({
+                    id: newbook.id,
+                    name: newbook.name,
+                    publisher: newbook.publisher
+                }))
+            },
+        });
+        response.code(200)
+        return response
+    }
+    else{
+        const response = h.response({
+            status: 'success',
+            data: {
+                books: books.map((book) => ({
+                    id: book.id,
+                    name: book.name,
+                    publisher: book.publisher
+                }))
+            }
+        });
+        response.code(200)
+        return response
+    }
+};
 
 module.exports = { addBookHandler, getAllBooksHandler };
