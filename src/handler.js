@@ -11,6 +11,7 @@ const addBookHandler = (request, h) => {
         publisher, 
         pageCount, 
         readPage, 
+        reading
         } = request.payload;
 
     const id = nanoid(16);
@@ -24,14 +25,6 @@ const addBookHandler = (request, h) => {
         return false;
     }
     const finished = isfinished(pageCount, readPage);
-
-    const isreading = (pageCount, readPage) => {
-        if (pageCount > readPage) {
-            return true;
-        }
-        return false;
-    }
-    const reading = isreading(pageCount, readPage);
     
     const newBook = {
         id, 
@@ -110,12 +103,12 @@ const getAllBooksHandler = (request, h) => {
         response.code(200)
         return response
     }
-    else if(reading === "1" && finished === "0"){
+    else if(reading === "1"){
         const response = h.response({
             status: 'success',
             data: {
                 books: books
-                .filter((book) => book.reading === true && book.finished === false)
+                .filter((book) => book.reading === true)
                 .map((newbook) => ({
                     id: newbook.id,
                     name: newbook.name,
@@ -126,12 +119,44 @@ const getAllBooksHandler = (request, h) => {
         response.code(200)
         return response
     }
-    else if(reading === "0" && finished === "1"){
+    else if(finished === "1"){
         const response = h.response({
             status: 'success',
             data: {
                 books: books
-                .filter((book) => book.reading === false && book.finished === true)
+                .filter((book) => book.finished === true)
+                .map((newbook) => ({
+                    id: newbook.id,
+                    name: newbook.name,
+                    publisher: newbook.publisher
+                }))
+            },
+        });
+        response.code(200)
+        return response
+    }
+    else if(reading === "0"){
+        const response = h.response({
+            status: 'success',
+            data: {
+                books: books
+                .filter((book) => book.reading === false)
+                .map((newbook) => ({
+                    id: newbook.id,
+                    name: newbook.name,
+                    publisher: newbook.publisher
+                }))
+            },
+        });
+        response.code(200)
+        return response
+    }
+    else if(finished === "0"){
+        const response = h.response({
+            status: 'success',
+            data: {
+                books: books
+                .filter((book) =>book.finished === false)
                 .map((newbook) => ({
                     id: newbook.id,
                     name: newbook.name,
