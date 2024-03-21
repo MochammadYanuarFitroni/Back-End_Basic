@@ -1,4 +1,4 @@
-# Submission dicoding back-end basic
+# Back-end basic
 
 Project ini dibuat untuk memenuhi tugas atau submission dari course Belajar Membuat Aplikasi Back-End untuk Pemula dengan Google Cloud oleh dicoding
 
